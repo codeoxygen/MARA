@@ -1,11 +1,11 @@
-PLANNER_SYSTEM = """You are a marketing campaign planner who transforms campaign briefs into complete, executable campaign plans.
-Your job is to:
-1. Analyze the campaign brief and infer strategic goals
-2. Design campaign phases and messaging
-3. Create channel-specific content pieces with production tasks
-4. Define success metrics and timeline
+PLANNER_SYSTEM = """You are a unified marketing campaign planner that combines the roles of strategist, architect, and task coordinator.
+You execute the full planning pipeline in one step:
+1. Analyze the campaign brief and infer strategic goals (Brief Analyst role)
+2. Design campaign structure, phases, messaging, and content strategy (Campaign Architect role)
+3. Expand content pieces with channel-specific production workflows (Channel Expander role)
+4. Structure the complete plan with actionable tasks and team assignments
 
-Return a comprehensive, ready-to-execute campaign plan as JSON."""
+Return a comprehensive, ready-to-execute campaign plan with channel-specific task details."""
 
 PLANNER_PROMPT = """Create a complete campaign plan from this brief:
 
@@ -20,16 +20,33 @@ Success Metrics: {success_metrics}
 Additional Context: {additional_context}
 
 Return a JSON campaign plan with:
-- overview (string): High-level campaign summary
-- phases (list): Campaign phases with name, duration, focus, tactics
-- content_pieces (list): Content for each channel with:
-  * title, description, channels, key_points
-  * For each channel: list of production tasks (e.g., ["visual_design", "copy", "approval", "publish"])
-  * estimated_effort (dict with channel: hours)
-  * owner_role (responsible team member)
-- messaging_strategy (string): Core messaging approach
-- timeline (dict): Detailed timeline by week/phase
-- success_criteria (list): Measurable success criteria
 
-Keep content_pieces focused and actionable. Each piece should be specific enough to create actual tasks in project management tools.
+1. STRATEGIC ANALYSIS:
+- overview (string): High-level campaign summary
+- inferred_goals (list): 2-4 specific, measurable goals inferred from the objective
+- messaging_strategy (string): Core messaging approach and key themes
+
+2. CAMPAIGN STRUCTURE:
+- phases (list): Campaign phases with:
+  * name, duration, focus, tactics (high-level tactics for this phase)
+- timeline (dict): Key milestones by phase/week
+- success_criteria (list): Measurable success criteria aligned to goals
+
+3. CONTENT STRATEGY:
+- content_pieces (list): Content pieces with:
+  * title, description, channels, key_points, content_type
+  * owner_role (e.g., "copywriter", "designer", "marketer")
+
+4. CHANNEL-SPECIFIC PRODUCTION TASKS:
+For EACH content piece, add channel-specific production task sequences:
+- Use standard templates:
+  * LinkedIn: Copy → Visual → Approval → Publish
+  * Email: Copy → HTML Build → QA/Test → Approval → Send
+  * Instagram: Visual → Copy → Approval → Publish
+  * Paid Search: Ad Copy → Audience Setup → Bid Strategy → Approval → Launch
+- Add to each content piece:
+  * <channel>_tasks (list): Production tasks with task_name, owner_role, estimated_hours
+  * estimated_effort (dict): Total hours per channel
+
+Each content piece should be specific and actionable for project management tools.
 """

@@ -81,8 +81,14 @@ class GraphRunner:
                         )
                     )
 
-                logger.info(f"✅ Graph completed: {session_id}")
-                asyncio.run(self._broadcast_graph_complete(session_id, initial_state))
+                # Check final status
+                final_status = initial_state.get("status", "unknown")
+                if final_status in ("awaiting_approval", "revision_requested"):
+                    logger.info(f"⏸️  Graph paused: {session_id} (waiting for approval/revision)")
+                else:
+                    logger.info(f"✅ Graph completed: {session_id} - Status: {final_status}")
+                    asyncio.run(self._broadcast_graph_complete(session_id, initial_state))
+
                 self.running_graphs.pop(session_id, None)
 
             except Exception as e:
@@ -93,6 +99,13 @@ class GraphRunner:
         self.running_graphs[session_id] = thread
         thread.start()
 
+    async def _log_and_broadcast(self, session_id: str, ws_event: WSEvent):
+        """Log streaming event and broadcast to frontend"""
+        log_prefix = f"📡 STREAM [{session_id}]"
+        log_msg = f"{log_prefix} {ws_event.node:20} | {ws_event.status.value:12} | {ws_event.message}"
+        logger.info(log_msg)
+        await websocket_manager.broadcast(session_id, ws_event)
+
     async def _broadcast_graph_start(self, session_id: str):
         """Broadcast graph execution started"""
         ws_event = WSEvent(
@@ -100,26 +113,24 @@ class GraphRunner:
             node="graph",
             status=WSNodeStatus.RUNNING,
             domain=WSDomain.PLANNER,
-            message="Campaign planning workflow started",
+            message="📊 Campaign planning workflow started",
             payload={"event": "graph_start"},
             timestamp=datetime.utcnow(),
         )
-        await websocket_manager.broadcast(session_id, ws_event)
+        await self._log_and_broadcast(session_id, ws_event)
 
     async def _broadcast_node_start(self, session_id: str, node_name: str):
         """Broadcast node execution starting"""
-        logger.info(f"▶️  Node starting: {node_name}")
-
         ws_event = WSEvent(
             session_id=session_id,
             node=node_name,
             status=WSNodeStatus.RUNNING,
             domain=self._infer_domain(node_name),
-            message=f"Starting {self._format_node_name(node_name)}",
+            message=f"▶️  Starting {self._format_node_name(node_name)}",
             payload={"event": "node_start", "node": node_name},
             timestamp=datetime.utcnow(),
         )
-        await websocket_manager.broadcast(session_id, ws_event)
+        await self._log_and_broadcast(session_id, ws_event)
 
     async def _broadcast_node_processing(
         self, session_id: str, node_name: str, full_state: Dict
@@ -132,7 +143,7 @@ class GraphRunner:
             node=node_name,
             status=WSNodeStatus.PROCESSING,
             domain=self._infer_domain(node_name),
-            message=f"{self._format_node_name(node_name)} processing... Status: {status_value}",
+            message=f"⏳ {self._format_node_name(node_name)} processing... Status: {status_value}",
             payload={
                 "event": "node_processing",
                 "node": node_name,
@@ -140,7 +151,7 @@ class GraphRunner:
             },
             timestamp=datetime.utcnow(),
         )
-        await websocket_manager.broadcast(session_id, ws_event)
+        await self._log_and_broadcast(session_id, ws_event)
 
     async def _broadcast_node_end(
         self, session_id: str, node_name: str, start_time: float, final_state: Dict
@@ -148,10 +159,6 @@ class GraphRunner:
         """Broadcast node execution completed"""
         elapsed = time.time() - start_time if start_time else 0
         status_value = final_state.get("status", "unknown")
-
-        logger.info(
-            f"✅ Node completed: {node_name} (took {elapsed:.2f}s, status: {status_value})"
-        )
 
         ws_event = WSEvent(
             session_id=session_id,
@@ -167,7 +174,7 @@ class GraphRunner:
             },
             timestamp=datetime.utcnow(),
         )
-        await websocket_manager.broadcast(session_id, ws_event)
+        await self._log_and_broadcast(session_id, ws_event)
 
     async def _broadcast_graph_complete(self, session_id: str, final_state: Dict):
         """Broadcast entire graph execution completed"""
@@ -187,7 +194,7 @@ class GraphRunner:
             },
             timestamp=datetime.utcnow(),
         )
-        await websocket_manager.broadcast(session_id, ws_event)
+        await self._log_and_broadcast(session_id, ws_event)
 
     async def _broadcast_error(self, session_id: str, error_msg: str):
         """Broadcast error event"""
@@ -201,7 +208,7 @@ class GraphRunner:
             payload={"event": "error", "error": error_msg},
             timestamp=datetime.utcnow(),
         )
-        await websocket_manager.broadcast(session_id, ws_event)
+        await self._log_and_broadcast(session_id, ws_event)
 
     @staticmethod
     def _infer_domain(node_name: str) -> WSDomain:

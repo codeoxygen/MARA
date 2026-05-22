@@ -22,6 +22,8 @@ async def planner(state: GraphState) -> GraphState:
         # Step 1: Validate input
         logger.info("Planner: Validating campaign brief")
         brief = state.get("campaign_brief", {})
+        approval_response = state.get("approval_response")
+        revision_count = state.get("revision_count", 0)
 
         if not brief.get("campaign_name"):
             raise ValueError("Campaign name is required")
@@ -30,9 +32,18 @@ async def planner(state: GraphState) -> GraphState:
         if not brief.get("channels"):
             raise ValueError("At least one channel is required")
 
-        # Step 2: Call unified LLM prompt for full planning
-        logger.info(f"Planner: Generating campaign plan for '{brief.get('campaign_name')}'")
+        # Determine if this is a revision or initial planning
+        if approval_response and approval_response.get("status") == "rejected":
+            logger.info(f"Planner: Revision #{revision_count + 1} - Incorporating feedback")
+            revision_feedback = approval_response.get("feedback", "Please improve the campaign plan")
+            additional_context = brief.get("additional_context", "")
+            additional_context = f"{additional_context}\n\nREVISION FEEDBACK:\n{revision_feedback}"
+            state["revision_count"] = revision_count + 1
+        else:
+            additional_context = brief.get("additional_context", "")
+            logger.info(f"Planner: Generating initial campaign plan for '{brief.get('campaign_name')}'")
 
+        # Step 2: Call unified LLM prompt for full planning
         prompt = PLANNER_PROMPT.format(
             campaign_name=brief.get("campaign_name", ""),
             objective=brief.get("objective", ""),
@@ -42,7 +53,7 @@ async def planner(state: GraphState) -> GraphState:
             budget=brief.get("budget", "Not specified"),
             key_messages=json.dumps(brief.get("key_messages", [])),
             success_metrics=json.dumps(brief.get("success_metrics", [])),
-            additional_context=brief.get("additional_context", ""),
+            additional_context=additional_context,
         )
 
         response = await llm_service.generate(
@@ -56,6 +67,11 @@ async def planner(state: GraphState) -> GraphState:
         # Step 3: Parse response
         logger.debug(f"Planner: Parsing LLM response")
         plan_data = extract_json(response)
+
+        if not plan_data:
+            logger.error(f"Planner: Failed to extract JSON from LLM response")
+            logger.error(f"Response preview: {response[:200]}")
+            raise ValueError("Failed to parse campaign plan from LLM response")
 
         # Step 4: Extract and assemble tasks
         logger.info("Planner: Assembling tasks from campaign plan")

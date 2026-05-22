@@ -13,10 +13,12 @@ class GraphState(TypedDict):
     campaign_plan: Optional[Dict[str, Any]]
     expanded_tasks: Optional[List[Dict[str, Any]]]
     assembled_tasks: Optional[Dict[str, Any]]
+    asana_project: Optional[Dict[str, Any]]
 
     # Comms outputs
     proposal: Optional[str]
     approval_response: Optional[Dict[str, Any]]
+    approval_token: Optional[str]
     approval_iterations: int
     max_iterations: int
 

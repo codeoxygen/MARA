@@ -143,9 +143,40 @@ async def submit_approval(
     state = campaign["state"]
 
     # Validate token if provided
-    if token and state.get("approval_token") != token:
-        logger.error(f"❌ Invalid token for campaign {campaign_id}")
-        raise HTTPException(status_code=403, detail="Invalid approval token")
+    if token:
+        stored_token = state.get("approval_token")
+        
+        # If token is not yet set in state, wait for it (with timeout)
+        if not stored_token:
+            logger.warning(f"⏳ Token not yet set in state for campaign {campaign_id}, waiting...")
+            max_wait = 30  # Wait up to 30 seconds for state to be ready
+            wait_interval = 0.5
+            elapsed = 0
+            
+            while elapsed < max_wait:
+                import time
+                time.sleep(wait_interval)
+                stored_token = state.get("approval_token")
+                elapsed += wait_interval
+                
+                if stored_token:
+                    logger.info(f"✅ Token appeared in state after {elapsed:.1f}s")
+                    break
+            
+            if not stored_token:
+                logger.error(f"❌ Approval token never appeared in state for campaign {campaign_id}")
+                logger.error(f"   Provided token: {token[:16]}...")
+                logger.error(f"   Stored token: None (state not ready)")
+                raise HTTPException(status_code=503, detail="Campaign approval state not ready - try again in a moment")
+        
+        # Compare tokens
+        if stored_token != token:
+            logger.error(f"❌ Invalid token for campaign {campaign_id}")
+            logger.error(f"   Provided token: {token[:16]}...")
+            logger.error(f"   Stored token:   {stored_token[:16]}...")
+            logger.error(f"   Status: {state.get('status')}")
+            logger.error(f"   Campaign state: {list(state.keys())}")
+            raise HTTPException(status_code=403, detail="Invalid approval token")
 
     # Map action to approval status
     if action == "approve":

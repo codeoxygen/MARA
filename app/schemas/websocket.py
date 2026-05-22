@@ -5,6 +5,7 @@ from datetime import datetime
 
 class WSNodeStatus(str, Enum):
     RUNNING = "running"
+    PROCESSING = "processing"
     COMPLETE = "complete"
     ERROR = "error"
     WAITING = "waiting"
@@ -21,6 +22,7 @@ class WSEvent(BaseModel):
     node: str
     status: WSNodeStatus
     domain: WSDomain
+    message: str = ""
     payload: Dict[str, Any] = {}
     iteration: int = 1
     timestamp: datetime

@@ -6,7 +6,6 @@ from app.graph.nodes import (
     validate_input,
     analyze_brief,
     architect_campaign,
-    expand_channels,
     assemble_tasks,
     format_proposal,
     handle_approval,
@@ -42,7 +41,6 @@ def build_graph():
     workflow.add_node("input_validator", validate_input)
     workflow.add_node("brief_analyst", _sync_wrapper(analyze_brief))
     workflow.add_node("campaign_architect", _sync_wrapper(architect_campaign))
-    workflow.add_node("channel_expander", _sync_wrapper(expand_channels))
     workflow.add_node("task_assembler", _sync_wrapper(assemble_tasks))
     workflow.add_node("proposal_formatter", _sync_wrapper(format_proposal))
     workflow.add_node("approval_handler", _sync_wrapper(handle_approval))
@@ -53,8 +51,7 @@ def build_graph():
     # Add edges
     workflow.add_edge("input_validator", "brief_analyst")
     workflow.add_edge("brief_analyst", "campaign_architect")
-    workflow.add_edge("campaign_architect", "channel_expander")
-    workflow.add_edge("channel_expander", "task_assembler")
+    workflow.add_edge("campaign_architect", "task_assembler")
     workflow.add_edge("task_assembler", "proposal_formatter")
     workflow.add_edge("proposal_formatter", "approval_handler")
     workflow.add_edge("metrics_fetcher", "insights_synthesizer")

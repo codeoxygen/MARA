@@ -5,6 +5,7 @@ from app.prompts.proposal_formatter import (
     PROPOSAL_FORMATTER_SYSTEM,
     PROPOSAL_FORMATTER_PROMPT,
 )
+from app.utils.json_utils import extract_json
 import json
 
 async def format_proposal(state: GraphState) -> GraphState:
@@ -23,7 +24,6 @@ async def format_proposal(state: GraphState) -> GraphState:
         proposal = await llm_service.generate(
             prompt=prompt,
             system=PROPOSAL_FORMATTER_SYSTEM,
-            max_tokens=3000,
         )
 
         state["proposal"] = proposal

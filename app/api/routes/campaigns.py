@@ -29,24 +29,24 @@ async def run_campaign(
         campaign_id = str(uuid.uuid4())
         session_id = str(uuid.uuid4())
 
-        initial_state = GraphState(
-            campaign_brief=brief.model_dump(),
-            campaign_id=campaign_id,
-            session_id=session_id,
-            enriched_brief=None,
-            campaign_plan=None,
-            expanded_tasks=None,
-            assembled_tasks=None,
-            proposal=None,
-            approval_response=None,
-            approval_iterations=0,
-            max_iterations=5,
-            metrics=None,
-            performance_report=None,
-            status="initialized",
-            error_message=None,
-            revision_count=0,
-        )
+        initial_state: GraphState = {
+            "campaign_brief": brief.model_dump(),
+            "campaign_id": campaign_id,
+            "session_id": session_id,
+            "enriched_brief": None,
+            "campaign_plan": None,
+            "expanded_tasks": None,
+            "assembled_tasks": None,
+            "proposal": None,
+            "approval_response": None,
+            "approval_iterations": 0,
+            "max_iterations": 5,
+            "metrics": None,
+            "performance_report": None,
+            "status": "initialized",
+            "error_message": None,
+            "revision_count": 0,
+        }
 
         campaigns[campaign_id] = {
             "session_id": session_id,
@@ -76,13 +76,20 @@ async def get_campaign(campaign_id: str):
         raise HTTPException(status_code=404, detail="Campaign not found")
 
     campaign = campaigns[campaign_id]
-    return {
+    response = {
         "campaign_id": campaign_id,
         "status": campaign["state"].get("status"),
         "created_at": campaign["created_at"],
     }
 
-@router.post("/{campaign_id}/approve")
+    # Include error message if present
+    error = campaign["state"].get("error_message")
+    if error:
+        response["error_message"] = error
+
+    return response
+
+@router.api_route("/{campaign_id}/approve", methods=["GET", "POST"])
 async def submit_approval(
     campaign_id: str,
     action: str = "approve",

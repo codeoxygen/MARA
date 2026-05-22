@@ -5,6 +5,7 @@ from app.prompts.insights_synthesizer import (
     INSIGHTS_SYNTHESIZER_SYSTEM,
     INSIGHTS_SYNTHESIZER_PROMPT,
 )
+from app.utils.json_utils import extract_json
 import json
 
 async def synthesize_insights(state: GraphState) -> GraphState:
@@ -23,10 +24,9 @@ async def synthesize_insights(state: GraphState) -> GraphState:
         response = await llm_service.generate(
             prompt=prompt,
             system=INSIGHTS_SYNTHESIZER_SYSTEM,
-            max_tokens=2000,
         )
 
-        insights = json.loads(response)
+        insights = extract_json(response)
         state["performance_report"] = {
             "campaign_id": state.get("campaign_id"),
             "campaign_name": brief.get("campaign_name", ""),

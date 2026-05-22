@@ -2,6 +2,7 @@ from app.services.llm_service import llm_service
 from app.graph.state import GraphState
 from app.core.logging import logger
 from app.prompts.brief_analyst import BRIEF_ANALYST_SYSTEM, BRIEF_ANALYST_PROMPT
+from app.utils.json_utils import extract_json
 import json
 
 async def analyze_brief(state: GraphState) -> GraphState:
@@ -24,18 +25,22 @@ async def analyze_brief(state: GraphState) -> GraphState:
         response = await llm_service.generate(
             prompt=prompt,
             system=BRIEF_ANALYST_SYSTEM,
-            max_tokens=2048,
         )
 
         if not response or not response.strip():
             raise ValueError("Empty response from LLM")
 
         logger.debug(f"Raw LLM response: {response[:500]}")
-        enriched = json.loads(response)
+        enriched = extract_json(response)
         state["enriched_brief"] = enriched
         state["status"] = "brief_analyzed"
         logger.info(f"Brief analyzed: {enriched.get('inferred_goals', [])}")
 
+    except json.JSONDecodeError as e:
+        state["status"] = "brief_analysis_failed"
+        state["error_message"] = f"Invalid JSON response from LLM: {str(e)}"
+        logger.error(f"Brief analysis failed - JSON decode error: {e}")
+        logger.error(f"Response was: {response[:200] if response else 'None'}")
     except Exception as e:
         state["status"] = "brief_analysis_failed"
         state["error_message"] = str(e)

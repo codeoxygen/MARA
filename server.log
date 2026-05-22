@@ -1,0 +1,15 @@
+INFO:     Started server process [21759]
+INFO:     Waiting for application startup.
+2026-05-22 18:39:29,510 - mara - INFO - Starting MARA in development mode
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-05-22 18:39:32,044 - mara - INFO - Starting graph execution: 7aa1252f-b422-4d6e-962f-eeaf8701e91c
+2026-05-22 18:39:32,045 - mara - INFO - Campaign started: 4bf30712-f342-437d-aa2c-5974c9d75060
+INFO:     127.0.0.1:54558 - "POST /api/campaigns/run HTTP/1.1" 200 OK
+2026-05-22 18:39:32,046 - mara - INFO - Input validated for campaign: Summer Sale
+2026-05-22 18:39:32,047 - mara - ERROR - Graph execution failed: 7aa1252f-b422-4d6e-962f-eeaf8701e91c: LLMService.generate() got an unexpected keyword argument 'max_tokens'
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-05-22 18:40:18,324 - mara - INFO - Shutting down MARA
+INFO:     Application shutdown complete.
+INFO:     Finished server process [21759]

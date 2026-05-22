@@ -27,6 +27,12 @@ class GraphRunner:
                 logger.info(f"Starting graph execution: {session_id}")
 
                 for event in graph.stream(initial_state):
+                    # Update the initial_state with the latest state from the event
+                    if isinstance(event, dict) and len(event) > 0:
+                        first_key = next(iter(event))
+                        if isinstance(event[first_key], dict):
+                            initial_state.update(event[first_key])
+
                     if event_callback:
                         event_callback(event)
 

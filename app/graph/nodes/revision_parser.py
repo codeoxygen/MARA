@@ -2,6 +2,7 @@ from app.services.llm_service import llm_service
 from app.graph.state import GraphState
 from app.core.logging import logger
 from app.prompts.revision_parser import REVISION_PARSER_SYSTEM, REVISION_PARSER_PROMPT
+from app.utils.json_utils import extract_json
 import json
 
 async def parse_revisions(state: GraphState) -> GraphState:
@@ -21,10 +22,9 @@ async def parse_revisions(state: GraphState) -> GraphState:
         parsed = await llm_service.generate(
             prompt=prompt,
             system=REVISION_PARSER_SYSTEM,
-            max_tokens=2000,
         )
 
-        revisions = json.loads(parsed)
+        revisions = extract_json(parsed)
         state["approval_response"] = revisions
         state["revision_count"] = state.get("revision_count", 0) + 1
         state["status"] = revisions.get("status", "revisions_requested")

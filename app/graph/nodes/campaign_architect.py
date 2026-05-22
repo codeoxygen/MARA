@@ -5,7 +5,8 @@ from app.prompts.campaign_architect import (
     CAMPAIGN_ARCHITECT_SYSTEM,
     CAMPAIGN_ARCHITECT_PROMPT,
 )
-import json
+from app.utils.json_utils import extract_json
+
 
 async def architect_campaign(state: GraphState) -> GraphState:
     """Create campaign plan from enriched brief"""
@@ -24,10 +25,9 @@ async def architect_campaign(state: GraphState) -> GraphState:
         response = await llm_service.generate(
             prompt=prompt,
             system=CAMPAIGN_ARCHITECT_SYSTEM,
-            max_tokens=3000,
         )
 
-        plan = json.loads(response)
+        plan = extract_json(response)
         state["campaign_plan"] = plan
         state["status"] = "campaign_planned"
         logger.info(f"Campaign plan created: {plan}")

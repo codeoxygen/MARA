@@ -1,0 +1,176 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: 'Manrope', 'Inter', system-ui, -apple-system, sans-serif;
+  background: #0a0a0a;
+  color: #e0e0e0;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3a;
+}
+
+/* Ant Design global overrides */
+.ant-input {
+  background: #111111 !important;
+  color: #e0e0e0 !important;
+  border-color: #2a2a2a !important;
+  font-family: 'Manrope', 'Inter', system-ui, sans-serif !important;
+}
+
+.ant-input::placeholder {
+  color: #888888 !important;
+}
+
+.ant-input:hover {
+  border-color: #00bcd4 !important;
+}
+
+.ant-input:focus,
+.ant-input-focused {
+  border-color: #00bcd4 !important;
+  box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.15) !important;
+}
+
+.ant-input-affix-wrapper {
+  background: #111111 !important;
+  border-color: #2a2a2a !important;
+  border-radius: 10px !important;
+  padding: 10px 14px !important;
+}
+
+.ant-input-affix-wrapper:hover {
+  border-color: #00bcd4 !important;
+}
+
+.ant-input-affix-wrapper-focused,
+.ant-input-affix-wrapper:focus-within {
+  border-color: #00bcd4 !important;
+  box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.15) !important;
+}
+
+.ant-input-affix-wrapper > .ant-input {
+  background: transparent !important;
+}
+
+.ant-input-suffix {
+  color: #00bcd4 !important;
+}
+
+/* Select overrides */
+.ant-select .ant-select-selector {
+  background: #111111 !important;
+  border-color: #2a2a2a !important;
+  color: #e0e0e0 !important;
+  border-radius: 8px !important;
+}
+
+.ant-select:hover .ant-select-selector {
+  border-color: #00bcd4 !important;
+}
+
+.ant-select-focused .ant-select-selector {
+  border-color: #00bcd4 !important;
+  box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.15) !important;
+}
+
+.ant-select-dropdown {
+  background: #1a1a1a !important;
+  border: 1px solid #2a2a2a !important;
+}
+
+.ant-select-item {
+  color: #e0e0e0 !important;
+}
+
+.ant-select-item-option-active {
+  background: rgba(0, 188, 212, 0.1) !important;
+}
+
+.ant-select-item-option-selected {
+  background: rgba(0, 188, 212, 0.15) !important;
+  color: #00bcd4 !important;
+}
+
+.ant-select-selection-item {
+  color: #e0e0e0 !important;
+}
+
+.ant-select-arrow {
+  color: #888888 !important;
+}
+
+/* Input Number overrides */
+.ant-input-number {
+  background: #111111 !important;
+  border-color: #2a2a2a !important;
+  color: #e0e0e0 !important;
+  border-radius: 8px !important;
+  width: 100%;
+}
+
+.ant-input-number:hover {
+  border-color: #00bcd4 !important;
+}
+
+.ant-input-number-focused {
+  border-color: #00bcd4 !important;
+  box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.15) !important;
+}
+
+.ant-input-number-input {
+  color: #e0e0e0 !important;
+  background: transparent !important;
+}
+
+.ant-input-number-handler-wrap {
+  background: #1a1a1a !important;
+  border-color: #2a2a2a !important;
+}
+
+.ant-input-number-handler {
+  color: #888888 !important;
+  border-color: #2a2a2a !important;
+}
+
+/* Tag overrides */
+.ant-tag {
+  background: rgba(0, 188, 212, 0.1) !important;
+  border-color: rgba(0, 188, 212, 0.3) !important;
+  color: #00bcd4 !important;
+  border-radius: 6px !important;
+}
+
+/* Tooltip */
+.ant-tooltip .ant-tooltip-inner {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  color: #e0e0e0;
+}
